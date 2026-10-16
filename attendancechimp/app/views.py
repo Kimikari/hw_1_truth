@@ -27,6 +27,18 @@ CDT = zoneinfo.ZoneInfo("America/Chicago")
 # HW2  — index, time, sum
 # ---------------------------------------------------------------------------
 
+def time_view(request):
+    current_time = datetime.now(CDT)
+    return HttpResponse(
+        current_time.strftime("%H:%M"),
+        content_type="text/plain",
+    )
+
+def sum_view(request):
+    n1 = float(request.GET["n1"])
+    n2 = float(request.GET["n2"])
+    return JsonResponse({"sum": n1 + n2})
+
 def index(request):
     """Render the home page (index.html)."""
 
