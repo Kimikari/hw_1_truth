@@ -1,0 +1,1 @@
+My model is simpler than the robot’s because mine only has 15 fields compared to the robots 35. The robot’s model is more complete because the schedule has more detail, for example it has days, start time, end time, and validation. Mine is easier to implement because most of the deletions cascades.
