@@ -12,9 +12,14 @@
 <body>
 <div class="bio">
     <h1>AttendanceChimp</h1>
-    <p>Electronic class attendance tracking application.</p>
+    <p>Hello, this is a web app made with Django. Made for students and instructors.</p>
     <hr>
-
+    {% if user.is_authenticated %}
+        <p>Logged in as:<b> {{ user.username }}</b></p>
+    {% else %}
+        <p>Not logged in.</p>
+    {% endif %}
+    <p>Current Time: {{ current_time }}</p>
 </div>
 </body>
 </html>
