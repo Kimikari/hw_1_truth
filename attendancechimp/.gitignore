@@ -1,0 +1,4 @@
+db.sqlite3
+/app/migrations/
+__pycache__/
+qr_uploads/

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+    <head><title>Upload QR Code</title></head>
+    <body>
+        <h1>Upload QR Code</h1>
+        <form method="post" action="/app/createQRCodeUpload" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label>Image:<input type="file" name="imageUpload" accept="image/*" required></label>
+            <p><button type="submit">Upload</button></p>
+        </form>
+    </body>
+</html>
