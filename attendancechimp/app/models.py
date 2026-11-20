@@ -18,6 +18,8 @@ Entities
 
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
+import zoneinfo
 
 import logging
 import string
@@ -48,6 +50,21 @@ class Course(models.Model):
     name = models.CharField(max_length=200)
     instructor = models.ForeignKey(InstructorProfile, on_delete=models.CASCADE)
     meeting_schedule = models.CharField(max_length=200)
+
+    course=models.CharField(max_length=200, null=True)
+    start_time=models.TimeField(max_length=5, null=True)
+    end_time=models.TimeField(max_length=5, null=True)
+    day_mon=models.BooleanField(default=False)
+    day_tue=models.BooleanField(default=False)
+    day_wed=models.BooleanField(default=False)
+    day_thu=models.BooleanField(default=False) 
+    day_fri=models.BooleanField(default=False)
+
+    def meets_on_day(self, day):
+        days=[self.day_mon, self.day_tue, self.day_wed, self.day_thu, self.day_fri]
+        return days[day]
+    
+
 
 # ---------------------------------------------------------------------------
 # Enrollment
@@ -95,3 +112,23 @@ class QRCodeUpload(models.Model):
 # ---------------------------------------------------------------------------
 # Helper / API functions
 # ---------------------------------------------------------------------------
+def getUploadsForCourse(course):
+    courses=Course.objects.filter(course=course)
+    if courses.count() == 0:
+        return []
+
+    course_object=courses[0]
+    if not course_object.start_time or not course_object.end_time:
+        return []
+
+    start=course_object.start_time
+    end=course_object.end_time
+    chicago=zoneinfo.ZoneInfo("America/Chicago")
+    valid_uploads=[]
+    for upload in QRCodeUpload.objects.filter(lecture__course=course_object):
+        local_timestamp=upload.uploaded_at.astimezone(chicago)
+        if course_object.meets_on_day(local_timestamp.weekday()):
+            if start <= local_timestamp.time() <= end:
+                valid_uploads.append(upload)
+
+    return valid_uploads

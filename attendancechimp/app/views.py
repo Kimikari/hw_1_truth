@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from datetime import datetime
-from .models import InstructorProfile, StudentProfile,Course, Enrollment, Lecture, QRCodeUpload
+from .models import InstructorProfile, StudentProfile,Course, Enrollment, Lecture, QRCodeUpload,getUploadsForCourse
 import zoneinfo
 import json
 import io
@@ -139,7 +139,19 @@ def createCourse(request):
         return HttpResponseBadRequest("Course name already exists.")
 
     schedule=" ".join(days)+" "+start_time+"-"+end_time
-    course=Course(name=course_name,instructor=instructors[0],meeting_schedule=schedule)
+    course= Course(
+        name=course_name,
+        instructor=instructors[0],
+        meeting_schedule=schedule,
+        course=course_name,
+        start_time=start_time,
+        end_time=end_time,
+        day_mon="mon" in request.POST,
+        day_tue="tue" in request.POST,
+        day_wed="wed" in request.POST,
+        day_thu="thu" in request.POST,
+        day_fri="fri" in request.POST
+    )
     course.save()
     return HttpResponse("Course created successfully.", status=200)
 
@@ -199,5 +211,24 @@ def dumpUploads(request):
 # HW6  — getUploads
 # ---------------------------------------------------------------------------
 
+def getUploads(request):
+    if not request.user.is_authenticated:
+        return HttpResponse(status=401)
+    if InstructorProfile.objects.filter(user=request.user).count()==0:
+        return HttpResponse(status=401)
+    if request.method!="GET":
+        return HttpResponseNotAllowed(["GET"])
 
+    course = request.GET.get("course")
+    if not course:
+        return JsonResponse({"error": "Missing course parameter."}, status=400)
+
+    data=[]
+    for upload in getUploadsForCourse(course):
+        data.append({
+            "username": upload.student.user.username,
+            "upload_time": upload.uploaded_at.strftime("%Y-%m-%d %H:%M:%S"),
+        })
+
+    return JsonResponse(data, safe=False)
 
